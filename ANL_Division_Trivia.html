@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Argonne National Laboratory Trivia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298, #1e3c72);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 1300px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            color: #1e3c72;
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+        }
+
+        .score {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .fact-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            border-left: 5px solid #007bff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .fact-text {
+            font-size: 2.0rem;
+            line-height: 1.7;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .division-btn {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 20px 25px;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            cursor: alias;
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+            line-height: 1.4;
+        }
+
+        .division-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+            background: linear-gradient(45deg, #0056b3, #004085);
+        }
+
+        .division-btn:active {
+            transform: translateY(0);
+        }
+
+        .division-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .message {
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .correct {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            animation: correctPulse 0.6s ease-in-out;
+        }
+
+        .incorrect {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #7416b3, #61099b);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 25px auto;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .buttons-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">🧪 Argonne Lab Trivia</h1>
+            <p class="subtitle">Match the fact to the correct research division!</p>
+            <div class="score">Score: <span id="score">0</span></div>
+        </div>
+
+        <div class="fact-container">
+            <div class="fact-text" id="fact-text">Loading...</div>
+        </div>
+
+        <div class="buttons-container" id="buttons-container">
+            <!-- Buttons will be generated by JavaScript -->
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const divisions = [
+            "Advanced Energy Technologies",
+            "Computing, Environment and Life Sciences", 
+            "Nuclear Technologies and National Security",
+            "Photon Sciences",
+            "Physical Sciences and Engineering"
+        ];
+
+        const facts = {
+            "Advanced Energy Technologies": [
+                "This directorate is heavily involved in developing next-generation battery technologies beyond lithium-ion, including solid-state batteries and other advanced chemistries, to create safer, more efficient, and longer-lasting energy storage solutions.",
+                "It conducts extensive research on circular economy principles for energy materials, particularly focusing on advanced and more efficient methods for recycling used lithium-ion batteries to recover valuable critical materials.",
+                "This directorate develops sophisticated computer modeling and simulation tools, like Autonomie, which are used by automotive manufacturers and researchers worldwide to simulate energy consumption, performance, and cost of advanced vehicle powertrains and new mobility systems.",
+                "The directorate is pioneering new approaches to manufacturing materials at scale, including leveraging AI and advanced processing techniques (like continuous atomic layer deposition) to efficiently produce innovative materials for solar cells, batteries, and other energy technologies.",
+                "Researchers at this directorate are actively involved in understanding and advancing future transportation systems, including connected and automated vehicles, and their complex interactions with the electrical grid and other energy infrastructure elements."
+            ],
+            "Computing, Environment and Life Sciences": [
+                "This directorate is at the forefront of using AI and machine learning to accelerate scientific discovery across multiple domains, including designing new materials, safeguarding the power grid, and automating traditional lab research.",
+                "It developed the MPICH team, which won the 2024 ACM Software System Award for their work on a high-performance MPI (Message Passing Interface) implementation, a critical component for scalable parallel computing used in supercomputers worldwide.",
+                "Researchers at this directorate have made significant strides in understanding how to restore gut health, with recent findings emphasizing that a healthy diet plays the most crucial role.",
+                "Beyond pure computation, this directorate integrates environmental and life sciences research, including work on terrestrial ecology, subsurface science, molecular biology, and even understanding the impact of solar arrays on insect populations.",
+                "This directorate is a core player in the Exascale Computing Project (ECP), a major collaborative effort across U.S. Department of Energy organizations to develop the next generation of supercomputing capabilities."
+            ],
+            "Nuclear Technologies and National Security": [
+                "Researchers within this directorate are at the forefront of designing next-generation nuclear reactors and fuel cycles, with a focus on making them safer, more efficient, and reducing the amount of nuclear waste produced.",
+                "This directorate actively contributes to strengthening the security and resilience of critical national infrastructure, including the electrical grid, by analyzing risks and developing solutions for various threats, both natural and human-caused.",
+                "They leverage advanced capabilities like artificial intelligence (AI) and machine learning to assist in the design and safety analysis of advanced reactors, moving towards predictive analysis for safer and more economical nuclear systems.",
+                "This directorate has a long history of helping countries around the world convert their nuclear research reactors from highly enriched uranium (HEU) to safer, low-enriched uranium (LEU), significantly reducing proliferation risks. Over 70 such conversions have been supported by Argonne's efforts."
+            ],
+            "Photon Sciences": [
+                "Researchers here develop and utilize cutting-edge X-ray imaging techniques to literally see inside intact, functioning systems, such as batteries charging or materials deforming under stress, in real-time and at atomic resolution.",
+                "This area is responsible for creating and maintaining the brightest X-ray beams on the Western Hemisphere, enabling discoveries across virtually all scientific disciplines, from biology to engineering.",
+                "Discoveries from this field have been instrumental in determining the 3D structures of complex biological molecules, which is crucial for drug discovery and understanding disease mechanisms.",
+                "Scientists here are developing novel optics and detectors that push the boundaries of X-ray science, allowing for even higher resolution, faster data acquisition, and new ways to probe materials.",
+                "The research conducted here provides foundational insights into the behavior of quantum materials, studying phenomena like superconductivity and magnetism by probing their electronic and atomic structures with unparalleled precision."
+            ],
+            "Physical Sciences and Engineering": [
+                "This directorate develops the core scientific understanding for quantum information science, working on breakthroughs in quantum materials, computing, and sensing that could revolutionize fields from medicine to cybersecurity.",
+                "It is home to researchers who pioneer new methods for manipulating matter at the atomic and molecular scale, which is critical for creating novel materials with unprecedented properties for energy, electronics, and more.",
+                "This directorate is a key player in developing advanced instrumentation and experimental techniques that enable the groundbreaking research done at Argonne's major user facilities, such as new detectors for the Advanced Photon Source or specialized tools for the Center for Nanoscale Materials.",
+                "Researchers within this directorate are at the forefront of catalysis research, discovering new chemical processes and materials that can make industrial processes more efficient, reduce waste, and enable sustainable energy production (e.g., converting carbon dioxide).",
+                "This directorate's expertise extends to fundamental studies of superconductivity and magnetism, investigating materials that could lead to lossless power transmission, more powerful magnets for fusion reactors, or entirely new types of electronics."
+            ]
+        };
+
+        let currentFact = null;
+        let currentDivision = null;
+        let score = 0;
+        let gameState = 'playing'; // 'playing', 'answered'
+        let usedFacts = new Set(); // Track used facts
+        let totalFacts = 0;
+
+        // Calculate total number of facts
+        function calculateTotalFacts() {
+            return Object.values(facts).reduce((total, divisionFacts) => total + divisionFacts.length, 0);
+        }
+
+        function getRandomFact() {
+            // If all facts have been used, show completion message
+            if (usedFacts.size >= totalFacts) {
+                return null;
+            }
+
+            let factData = null;
+            let attempts = 0;
+            const maxAttempts = 30; // Prevent infinite loop
+
+            while (!factData && attempts < maxAttempts) {
+                const divisionNames = Object.keys(facts);
+                const randomDivision = divisionNames[Math.floor(Math.random() * divisionNames.length)];
+                const divisionFacts = facts[randomDivision];
+                const randomFactIndex = Math.floor(Math.random() * divisionFacts.length);
+                const randomFact = divisionFacts[randomFactIndex];
+                
+                // Create a unique identifier for this fact
+                const factId = `${randomDivision}:${randomFactIndex}`;
+                
+                if (!usedFacts.has(factId)) {
+                    usedFacts.add(factId);
+                    factData = {
+                        division: randomDivision,
+                        fact: randomFact
+                    };
+                }
+                attempts++;
+            }
+            
+            return factData;
+        }
+
+        function createButtons() {
+            const container = document.getElementById('buttons-container');
+            container.innerHTML = '';
+            
+            divisions.forEach(division => {
+                const button = document.createElement('button');
+                button.className = 'division-btn';
+                button.textContent = division;
+                button.onclick = (event) => checkAnswer(division);
+                container.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedDivision, event) {
+            if (gameState !== 'playing') return;
+            
+            const messageDiv = document.getElementById('message');
+            const buttons = document.querySelectorAll('.division-btn');
+            
+            if (selectedDivision === currentDivision) {
+                score++;
+                document.getElementById('score').textContent = score;
+                messageDiv.innerHTML = `
+                    <div class="message correct">
+                        🎉 Correct! This fact is about ${currentDivision}.
+                        <br><button class="next-btn" onclick="nextQuestion()">Next Fact</button>
+                    </div>
+                `;
+                buttons.forEach(btn => btn.disabled = true);
+                gameState = 'answered';
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message incorrect">
+                        ❌ Not quite right. Try again!
+                    </div>
+                `;
+                // Disable the incorrect button
+                event.target.disabled = true;
+                
+                // Clear message after 3 seconds
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 3000);
+            }
+        }
+
+        function nextQuestion() {
+            const factData = getRandomFact();
+            
+            // Check if all facts have been used
+            if (!factData) {
+                showGameComplete();
+                return;
+            }
+            
+            currentFact = factData.fact;
+            currentDivision = factData.division;
+            
+            document.getElementById('fact-text').textContent = currentFact;
+            document.getElementById('message').innerHTML = '';
+            
+            // Re-enable all buttons
+            const buttons = document.querySelectorAll('.division-btn');
+            buttons.forEach(btn => btn.disabled = false);
+            
+            gameState = 'playing';
+            
+            // Update progress indicator
+            updateProgress();
+        }
+
+        function showGameComplete() {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `
+                <div class="message correct">
+                    🎉 Congratulations! You've completed all ${totalFacts} facts!<br>
+                    Final Score: ${score}/${totalFacts} (${Math.round((score/totalFacts)*100)}%)<br>
+                    <button class="next-btn" onclick="resetGame()">Play Again</button>
+                </div>
+            `;
+            
+            // Disable all division buttons
+            const buttons = document.querySelectorAll('.division-btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            // Hide the fact container
+            document.getElementById('fact-text').textContent = "Game Complete!";
+        }
+
+        function resetGame() {
+            usedFacts.clear();
+            score = 0;
+            document.getElementById('score').textContent = score;
+            updateProgress();
+            nextQuestion();
+        }
+
+        function updateProgress() {
+            const progressText = `${usedFacts.size}/${totalFacts} facts completed`;
+            document.querySelector('.subtitle').textContent = `Match the fact to the correct research division! (${progressText})`;
+        }
+
+        // Initialize the game
+        totalFacts = calculateTotalFacts();
+        createButtons();
+        nextQuestion();
+    </script>
+</body>
+</html>

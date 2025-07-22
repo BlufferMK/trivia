@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOE Office of Science National Laboratories Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+        
+        .intro-text {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            text-align: justify;
+        }
+        
+        .labs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .lab-name {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            color: #2c3e50;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .lab-name:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.4em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .fact-container {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid #f39c12;
+        }
+        
+        .fact-text {
+            font-size: 1.4em;
+            color: #2c3e50;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        
+        .lab-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 25px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .lab-btn {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.5em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(116, 185, 255, 0.3);
+        }
+        
+        .lab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.5);
+        }
+        
+        .message {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .correct {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+        }
+        
+        .incorrect {
+            background: linear-gradient(135deg, #e17055 0%, #fd79a8 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(225, 112, 85, 0.3);
+        }
+        
+        .score {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .labs-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .lab-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .labs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .lab-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Page -->
+        <div id="welcome-page">
+            <h1>DOE Office of Science National Laboratories</h1>
+            
+            <div class="intro-text">
+                The Energy Department's 17 National Labs tackle the critical scientific challenges of our time -- from combating climate change to discovering the origins of our universe -- and possess unique instruments and facilities, many of which are found nowhere else in the world. They address large scale, complex research and development challenges with a multidisciplinary approach that places an emphasis on translating basic science to innovation.
+                <br><br>
+                Ten of the National Laboratories are directed by the Office of Science.
+            </div>
+            
+            <h2>The 10 Office of Science National Laboratories:</h2>
+            <div class="labs-grid">
+                <div class="lab-name">Ames Laboratory</div>
+                <div class="lab-name">Argonne National Laboratory</div>
+                <div class="lab-name">Brookhaven National Laboratory</div>
+                <div class="lab-name">Fermi National Accelerator Laboratory</div>
+                <div class="lab-name">Lawrence Berkeley National Laboratory</div>
+                <div class="lab-name">Oak Ridge National Laboratory</div>
+                <div class="lab-name">Pacific Northwest National Laboratory</div>
+                <div class="lab-name">Princeton Plasma Physics Laboratory</div>
+                <div class="lab-name">SLAC National Accelerator Laboratory</div>
+                <div class="lab-name">Thomas Jefferson National Accelerator Facility</div>
+            </div>
+            
+            <p style="font-size: 1.2em; color: #2c3e50; margin-bottom: 20px;">
+                Would you like to explore the 10 Office of Science National Laboratories?
+            </p>
+            <button class="btn" onclick="startGame()">Yes, Let's Begin!</button>
+        </div>
+        
+        <!-- Game Page -->
+        <div id="game-page" class="hidden">
+            <h1>Laboratory Matching Challenge</h1>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            
+            <div class="score" id="score">Score: 0/10</div>
+            
+            <div class="fact-container">
+                <p style="font-size: 1.1em; margin-bottom: 15px; color: #2c3e50;">
+                    <strong>Which of the Office of Science National Laboratories is related to this fact?</strong>
+                </p>
+                <div class="fact-text" id="current-fact"></div>
+            </div>
+            
+            <div class="lab-buttons" id="lab-buttons"></div>
+            
+            <div id="message-container"></div>
+            
+            <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Next Question</button>
+            <button class="btn hidden" id="restart-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const labs = [
+            {
+                name: "Ames Laboratory",
+                fact: "Founded in 1947. Annual budget of just $65 million. Only national laboratory that is physically located on the campus of a major research university."
+            },
+            {
+                name: "Argonne National Laboratory",
+                fact: "The first US National Laboratory, established on July 1, 1946 to develop nuclear reactors for the nation's peaceful nuclear energy program."
+            },
+            {
+                name: "Brookhaven National Laboratory",
+                fact: "This is the home of the NASA Space Radiation Laboratory, which studies the effects of cosmic radiation."
+            },
+            {
+                name: "Fermi National Accelerator Laboratory",
+                fact: "Dedicated in 1974, discovered the bottom quark in 1977. Nobel Prize Winner Leon Lederman was the director from 1979 to 1989."
+            },
+            {
+                name: "Lawrence Berkeley National Laboratory",
+                fact: "The oldest National Laboratory, established in 1931, but not the First National Laboratory."
+            },
+            {
+                name: "Oak Ridge National Laboratory",
+                fact: "This facility housed the first operating nuclear reactor, producing plutonium in a pilot plant beginning in late 1943 as part of the Manhattan Project."
+            },
+            {
+                name: "Pacific Northwest National Laboratory",
+                fact: "Became a national laboratory in 1965. One of the largest Office of Science national labs, with a FY24 budget of $1.64 billion."
+            },
+            {
+                name: "Princeton Plasma Physics Laboratory",
+                fact: "Their vision is \"Enabling a world powered by safe, clean and plentiful fusion energy while leading discoveries in plasma science and technology\""
+            },
+            {
+                name: "SLAC National Accelerator Laboratory",
+                fact: "Partnered with Stanford University to build the Vera C. Rubin Observatory – the world's largest digital camera, which recently released its first images."
+            },
+            {
+                name: "Thomas Jefferson National Accelerator Facility",
+                fact: "Originally established in 1984. Gained its current name in 1996. Home of the Continuous Electron Beam Accelerator Facility (CEBAF)."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questionsAsked = [];
+        let currentCorrectAnswer = "";
+
+        function startGame() {
+            document.getElementById('welcome-page').classList.add('hidden');
+            document.getElementById('game-page').classList.remove('hidden');
+            resetGame();
+            nextQuestion();
+        }
+
+        function resetGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            questionsAsked = [];
+            updateScore();
+            updateProgress();
+        }
+
+        function nextQuestion() {
+            if (questionsAsked.length >= 10) {
+                endGame();
+                return;
+            }
+
+            // Clear previous message
+            document.getElementById('message-container').innerHTML = '';
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // Get a random question that hasn't been asked
+            let availableQuestions = labs.filter((_, index) => !questionsAsked.includes(index));
+            let randomIndex = Math.floor(Math.random() * availableQuestions.length);
+            let selectedLab = availableQuestions[randomIndex];
+            
+            // Find the original index
+            let originalIndex = labs.findIndex(lab => lab.name === selectedLab.name);
+            questionsAsked.push(originalIndex);
+            currentCorrectAnswer = selectedLab.name;
+
+            // Display the fact
+            document.getElementById('current-fact').textContent = selectedLab.fact;
+
+            // Create buttons for all labs
+            const buttonsContainer = document.getElementById('lab-buttons');
+            buttonsContainer.innerHTML = '';
+            
+            labs.forEach(lab => {
+                const button = document.createElement('button');
+                button.className = 'lab-btn';
+                button.textContent = lab.name;
+                button.onclick = () => checkAnswer(lab.name);
+                buttonsContainer.appendChild(button);
+            });
+
+            updateProgress();
+        }
+
+        function checkAnswer(selectedLab) {
+            const messageContainer = document.getElementById('message-container');
+            
+            if (selectedLab === currentCorrectAnswer) {
+                score++;
+                updateScore();
+                messageContainer.innerHTML = '<div class="message correct">🎉 Correct! Well done!</div>';
+                
+                // Disable all buttons
+                const buttons = document.querySelectorAll('.lab-btn');
+                buttons.forEach(btn => btn.disabled = true);
+                
+                if (questionsAsked.length < 10) {
+                    document.getElementById('next-btn').classList.remove('hidden');
+                } else {
+                    setTimeout(endGame, 2000);
+                }
+            } else {
+                messageContainer.innerHTML = '<div class="message incorrect">❌ Not quite right. Try again!</div>';
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score}/${questionsAsked.length}`;
+        }
+
+        function updateProgress() {
+            const progress = (questionsAsked.length / 10) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function endGame() {
+            const messageContainer = document.getElementById('message-container');
+            let message = '';
+            
+            if (score === 10) {
+                message = '<div class="message correct">🏆 Perfect Score! You\'re a National Laboratory expert!</div>';
+            } else if (score >= 7) {
+                message = '<div class="message correct">🌟 Great job! You know your laboratories well!</div>';
+            } else if (score >= 5) {
+                message = '<div class="message incorrect">👍 Good effort! You\'re learning about these important facilities!</div>';
+            } else {
+                message = '<div class="message incorrect">📚 Keep exploring! These laboratories do amazing work worth learning about!</div>';
+            }
+            
+            messageContainer.innerHTML = message;
+            document.getElementById('restart-btn').classList.remove('hidden');
+            
+            // Disable all buttons
+            const buttons = document.querySelectorAll('.lab-btn');
+            buttons.forEach(btn => btn.disabled = true);
+        }
+
+        function restartGame() {
+            document.getElementById('restart-btn').classList.add('hidden');
+            resetGame();
+            nextQuestion();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Argonne User Facilities Trivia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b35, #ff8e2b, #ffa726);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            color: #c62828;
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+        }
+
+        .score {
+            background: linear-gradient(45deg, #d32f2f, #f57c00);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .fact-container {
+            background: #fff3e0;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            border-left: 5px solid #ff7043;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .fact-text {
+            font-size: 1.5rem;
+            line-height: 1.7;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .facility-btn {
+            background: linear-gradient(45deg, #2017c9, #0823ba);
+            color: white;
+            border: none;
+            padding: 20px 25px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(255, 112, 67, 0.3);
+            line-height: 1.4;
+        }
+
+        .facility-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 112, 67, 0.4);
+            background: linear-gradient(45deg, #e64a19, #d84315);
+        }
+
+        .facility-btn:active {
+            transform: translateY(0);
+        }
+
+        .facility-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .message {
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .correct {
+            background: linear-gradient(45deg, #43a09a, #108688);
+            color: white;
+            animation: correctPulse 0.6s ease-in-out;
+        }
+
+        .incorrect {
+            background: linear-gradient(45deg, #d32f2f, #c62828);
+            color: white;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #7416b3, #61099b);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 25px auto;
+            box-shadow: 0 4px 8px rgba(255, 183, 77, 0.3);
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 183, 77, 0.4);
+            background: linear-gradient(45deg, #28901a, #08a21f);
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .buttons-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">🔬 Argonne Facilities Trivia</h1>
+            <p class="subtitle">Match the fact to the correct User Facility!</p>
+            <div class="score">Score: <span id="score">0</span></div>
+        </div>
+
+        <div class="fact-container">
+            <div class="fact-text" id="fact-text">Loading...</div>
+        </div>
+
+        <div class="buttons-container" id="buttons-container">
+            <!-- Buttons will be generated by JavaScript -->
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const facilities = [
+            "Aurora",
+            "Center for Nanoscale Materials",
+            "Materials Engineering Research Facility",
+            "Advanced Photon Source",
+            "ATLAS",
+            "ARM Atmospheric Radiation Measurement",
+            "Intermediate Voltage Electron Microscope"
+        ];
+
+        const facts = {
+            "Aurora": [
+                "It's so big, it takes up the space of two professional basketball courts and weighs over 600 tons.",
+                "Scientists are employing it to accelerate the discovery of new battery materials and advance research in fusion energy, paving the way for cleaner energy solutions.",
+                "It has helped create hyper-realistic simulations of blood flow in the human circulatory system, which can lead to new insights into how diseases, like cancer, spread.",
+                "Scientists have used it to rapidly screen billions of potential small molecules to find new leads for cancer treatments, a task that can be done much more quickly using this facility.",
+                "It allows researchers to interact with data streaming in real-time from experiments, rather than in batch processes, enabling faster insights.",
+                "Researchers are using it to develop high-fidelity models of complex systems like nuclear reactors and supernovae, deepening our understanding of their behavior."
+            ],
+            "Center for Nanoscale Materials": [
+                "Researchers at this facility have created self-lubricating materials using ultra-thin, two-dimensional alloys – a breakthrough that could dramatically reduce friction and wear in various technologies.",
+                "This facility played a key role in developing a new type of automated, AI-driven laboratory (\"Polybot\") that can accelerate the manufacturing process of electronic polymers, leading to highly conductive, transparent films.",
+                "The facility has helped develop new materials for advanced batteries, including creating cobalt-free cathode materials and developing new solid electrolytes to improve energy storage, lifespan, and safety.",
+                "They are at the forefront of understanding and harnessing the behavior of tiny quantum particles (like magnons) for potential future quantum computing and sensing technologies.",
+                "Scientists here are able to study materials down to the single atom and molecule level, allowing them to precisely manipulate properties for new applications, like making better heat control in electronic devices."
+            ],
+            "Materials Engineering Research Facility": [
+                "This facility specializes in taking tiny, promising material discoveries made in a lab and figuring out how to produce them in kilogram quantities, enough for industry to actually test and prototype.",
+                "Researchers here developed advanced methods to manufacture cobalt-free cathode materials for batteries, which could make electric vehicles more sustainable and affordable.",
+                "It's a place where scientists use AI-driven, automated systems to rapidly develop manufacturing \"recipes\" for new electronic polymers, ensuring they can be made efficiently and with high quality.",
+                "This facility works to reduce waste and energy consumption in the manufacturing process of new materials, aiming for more economical and environmentally friendly production.",
+                "They are essential in developing new technologies for recycling used lithium-ion batteries, helping to recover valuable materials and create a more circular economy for electric vehicles."
+            ],
+            "Advanced Photon Source": [
+                "This facility has been instrumental in the development of multiple Nobel Prize-winning research projects in chemistry, demonstrating its foundational role in breakthroughs like determining the structure of the ribosome and G protein-coupled receptors.",
+                "This facility played a crucial role in the fight against a recent global pandemic, as its X-rays helped scientists quickly determine the 3D structures of viral proteins, which was essential for developing COVID-19 vaccines and treatments like Pfizer's Paxlovid pill.",
+                "Researchers use this facility to literally peer inside working batteries in real-time – while they are charging and discharging – to understand how they fail and how to design longer-lasting, faster-charging energy storage devices.",
+                "The facility is so precise that it can detect and analyze trace amounts of elements in environmental samples, even down to the nanometer scale, providing insights into pollution, geological processes, and more.",
+                "This facility has helped scientists design and develop new materials for 3D printing, allowing them to understand how printed parts behave at the atomic level and create more durable and customized components for various industries."
+            ],
+            "ATLAS": [
+                "This facility is the world's first superconducting linear accelerator for heavy ions, which means it uses special magnets cooled to extremely low temperatures to accelerate atomic nuclei very efficiently.",
+                "It has the unique ability to accelerate virtually any element from the periodic table, from hydrogen all the way up to uranium, allowing researchers to study a vast range of nuclear structures.",
+                "This facility is one of the only facilities globally that can create and use beams of radioactive isotopes (through its CARIBU facility), allowing scientists to study exotic nuclei that only exist for fractions of a second and mimic conditions found in exploding stars.",
+                "Researchers at this facility use it to investigate the fundamental forces that govern the atomic nucleus, helping to understand how protons and neutrons interact and form the matter around us.",
+                "The work done at this facility provides crucial data for nuclear astrophysics, helping to explain how the heavy elements in the universe, like the gold in your jewelry, were formed in cosmic events."
+            ],
+            "ARM Atmospheric Radiation Measurement": [
+                "While Argonne manages some of its key observatories, this facility is actually a multi-laboratory facility with instruments deployed at fixed locations and in mobile units across all seven continents and five oceans, making it truly global.",
+                "This facility has been continuously collecting data for over 30 years, creating one of the longest and most comprehensive climate data records in the world.",
+                "Researchers use this facility's data to understand phenomena often too small for traditional global climate models, like the formation of individual clouds and tiny aerosol particles, and how they impact Earth's energy balance.",
+                "Beyond fixed ground stations, this facility employs mobile facilities (AMFs) and aerial capabilities (AAF), including crewed aircraft, uncrewed aerial systems (UAS), and tethered balloons, to gather data in under-sampled regions or during specific, intense weather events.",
+                "All the vast amounts of atmospheric data collected by this facility—spanning decades and from diverse locations—are freely available to scientists worldwide, making it a massive open-access resource for climate and Earth system modeling research."
+            ],
+            "Intermediate Voltage Electron Microscope": [
+                "This facility is unique because it's essentially two powerful tools combined: a high-resolution electron microscope and an ion beam accelerator, allowing scientists to study materials while they are being bombarded with ions.",
+                "It can simulate years of radiation damage that would occur in a nuclear reactor in just a few hours or days, without making the samples radioactive, which is critical for developing new nuclear energy materials.",
+                "Researchers use this facility to capture real-time video of atomic-level changes happening in materials as they are exposed to radiation or stress, showing exactly how defects form and evolve.",
+                "This facility allows scientists to precisely control not only the type and energy of the ions but also the temperature (from extremely cold to very hot, 20 K to 1100°C) and even apply physical strain to the sample during observation."
+            ]
+        };
+
+        let currentFact = null;
+        let currentFacility = null;
+        let score = 0;
+        let gameState = 'playing'; // 'playing', 'answered'
+        let usedFacts = new Set(); // Track used facts
+        let totalFacts = 0;
+
+        // Calculate total number of facts
+        function calculateTotalFacts() {
+            return Object.values(facts).reduce((total, facilityFacts) => total + facilityFacts.length, 0);
+        }
+
+        function getRandomFact() {
+            // If all facts have been used, show completion message
+            if (usedFacts.size >= totalFacts) {
+                return null;
+            }
+
+            let factData = null;
+            let attempts = 0;
+            const maxAttempts = 30; // Prevent infinite loop
+
+            while (!factData && attempts < maxAttempts) {
+                const facilityNames = Object.keys(facts);
+                const randomFacility = facilityNames[Math.floor(Math.random() * facilityNames.length)];
+                const facilityFacts = facts[randomFacility];
+                const randomFactIndex = Math.floor(Math.random() * facilityFacts.length);
+                const randomFact = facilityFacts[randomFactIndex];
+                
+                // Create a unique identifier for this fact
+                const factId = `${randomFacility}:${randomFactIndex}`;
+                
+                if (!usedFacts.has(factId)) {
+                    usedFacts.add(factId);
+                    factData = {
+                        facility: randomFacility,
+                        fact: randomFact
+                    };
+                }
+                attempts++;
+            }
+            
+            return factData;
+        }
+
+        function createButtons() {
+            const container = document.getElementById('buttons-container');
+            container.innerHTML = '';
+            
+            facilities.forEach(facility => {
+                const button = document.createElement('button');
+                button.className = 'facility-btn';
+                button.textContent = facility;
+                button.onclick = (event) => checkAnswer(facility);
+                container.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedFacility, event) {
+            if (gameState !== 'playing') return;
+            
+            const messageDiv = document.getElementById('message');
+            const buttons = document.querySelectorAll('.facility-btn');
+            
+            if (selectedFacility === currentFacility) {
+                score++;
+                document.getElementById('score').textContent = score;
+                messageDiv.innerHTML = `
+                    <div class="message correct">
+                        🎉 Correct! This fact is about ${currentFacility}.
+                        <br><button class="next-btn" onclick="nextQuestion()">Next Fact</button>
+                    </div>
+                `;
+                buttons.forEach(btn => btn.disabled = true);
+                gameState = 'answered';
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message incorrect">
+                        ❌ Not quite right. Try again!
+                    </div>
+                `;
+                // Disable the incorrect button
+                event.target.disabled = true;
+                
+                
+                // Clear message after 3 seconds
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 3000);
+            }
+        }
+
+        function nextQuestion() {
+            const factData = getRandomFact();
+            
+            // Check if all facts have been used
+            if (!factData) {
+                showGameComplete();
+                return;
+            }
+            
+            currentFact = factData.fact;
+            currentFacility = factData.facility;
+            
+            document.getElementById('fact-text').textContent = currentFact;
+            document.getElementById('message').innerHTML = '';
+            
+            // Re-enable all buttons
+            const buttons = document.querySelectorAll('.facility-btn');
+            buttons.forEach(btn => btn.disabled = false);
+            
+            gameState = 'playing';
+            
+            // Update progress indicator
+            updateProgress();
+        }
+
+        function showGameComplete() {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `
+                <div class="message correct">
+                    🎉 Congratulations! You've completed all ${totalFacts} facts!<br>
+                    Final Score: ${score}/${totalFacts} (${Math.round((score/totalFacts)*100)}%)<br>
+                    <button class="next-btn" onclick="resetGame()">Play Again</button>
+                </div>
+            `;
+            
+            // Disable all facility buttons
+            const buttons = document.querySelectorAll('.facility-btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            // Hide the fact container
+            document.getElementById('fact-text').textContent = "Game Complete!";
+        }
+
+        function resetGame() {
+            usedFacts.clear();
+            score = 0;
+            document.getElementById('score').textContent = score;
+            updateProgress();
+            nextQuestion();
+        }
+
+        function updateProgress() {
+            const progressText = `${usedFacts.size}/${totalFacts} facts completed`;
+            document.querySelector('.subtitle').textContent = `Match the fact to the correct user facility! (${progressText})`;
+        }
+
+        // Initialize the game
+        totalFacts = calculateTotalFacts();
+        createButtons();
+        nextQuestion();
+    </script>
+</body>
+</html>
